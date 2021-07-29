@@ -1,4 +1,5 @@
 import React, { useRef, useCallback, useState} from 'react';
+import produce from 'immer';
 
 interface Data {
   array: {
@@ -7,12 +8,15 @@ interface Data {
     username: string
   }[],
   uselessValue: any
-
+}
+interface Form {
+  name: string,
+  username: string
 }
 
 const App = () => {
   const nextId = useRef(1);
-  const [form, setForm] = useState({name: '', username: ''});
+  const [form, setForm] = useState<Form>({name: '', username: ''});
   const [data, setData] = useState<Data>({
     array: [],
     uselessValue: null
@@ -21,11 +25,12 @@ const App = () => {
   const onChange = useCallback(
     e => {
       const { name, value } = e.target;
-      setForm({
-        ...form,
-        [name]: [value]
-      });
-    }, [form]
+      setForm(
+        produce((draft:any) => {
+          draft[name] = value;
+        })
+      );
+    }, []
   );
 
   const onSubmit = useCallback(
@@ -37,17 +42,59 @@ const App = () => {
         username: form.username
       };
 
-      setData({
-        ...data,
-        array: data.array.concat(info)
-      });
+      setData(
+        produce(draft => {
+          draft.array.push(info);
+        })
+      );
 
+      setForm({
+        name: '',
+        username: ''
+      });
+      nextId.current += 1;
     },
-    [data, form.name, form.username]
+    [form.name, form.username]
+  )
+
+  const onRemove = useCallback(
+    id => { 
+      setData(
+        produce(draft => {
+          draft.array.splice(draft.array.findIndex(info => info.id === id),1);
+        })
+      );
+    },
+    []
   )
 
   return (
-    <div></div>
+    <div>
+      <form onSubmit={onSubmit}>
+        <input
+          name="username"
+          placeholder="아이디"
+          value={form.username}
+          onChange={onChange}
+        />
+        <input
+          name="name"
+          placeholder="이름"
+          value={form.name}
+          onChange={onChange}
+        />
+        <button type="submit">등록</button>
+      </form>
+      <div>
+        <ul>
+          {data.array.map(info => (
+            <li key={info.id} onClick={() => onRemove(info.id)}>
+              {info.username} ({info.name})
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
   );
 }
 
