@@ -1,24 +1,34 @@
 import React from 'react';
-import logo from './logo.svg';
+import { Route, Link, Switch } from 'react-router-dom';
+import Home from './Home';
+import About from './About';
+import Profiles from './Profiles';
+import HistorySample from './HistorySample';
 import './App.css';
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <ul>
+        <li><Link to="/">Home</Link></li>
+        <li><Link to="/about">About</Link></li>
+        <li><Link to="/profiles">Profiles</Link></li>
+        <li><Link to="/history">History</Link></li>
+      </ul>
+      <Switch>
+        <Route path="/" component={Home} exact={true}/>
+        <Route path={['/about', '/info']} component={About}/>
+        <Route path="/profiles" component={Profiles}/>
+        <Route path="/history" component={HistorySample}/>
+        <Route
+          render={({ location} ) => (
+            <div>
+              <h2>page not found</h2>
+              <p>{location.pathname}</p>
+            </div>
+          )}
+        />
+      </Switch>
     </div>
   );
 }
